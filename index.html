@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOUZTEC - Tecnologia que respeita seu tempo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1E1E1E;
+            color: #E6E6E6;
+            scroll-behavior: smooth;
+        }
+
+        .hero-bg {
+            background: radial-gradient(circle at 50% 50%, rgba(30, 30, 30, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px #FF6E2E, 0 0 10px #FF6E2E, 0 0 15px #FF6E2E;
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 25px -5px rgba(255, 110, 46, 0.3), 0 10px 10px -5px rgba(255, 110, 46, 0.1);
+        }
+
+        .sand-animation {
+            animation: sandFlow 8s infinite alternate;
+        }
+
+        @keyframes sandFlow {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(16px);
+            }
+        }
+
+        .ai-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000; /* Aumentado para ficar sobre o chat widget se necessário */
+            animation: pulse 2s infinite;
+        }
+
+        .ai-button-icon-glow {
+            text-shadow: 0 0 6px #00FFFF, 0 0 12px #00FFFF;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 110, 46, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 110, 46, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 110, 46, 0);
+            }
+        }
+
+        .grid-pattern {
+            background-image:
+                linear-gradient(rgba(255, 110, 46, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 110, 46, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1E1E1E;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #FF6E2E;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff8c5a;
+        }
+
+        .hourglass-logo {
+            filter: drop-shadow(0 0 2px #FF6E2E) drop-shadow(0 0 4px #FF6E2E);
+        }
+        .hourglass-logo-caps {
+             box-shadow: 0 0 2px rgba(255,110,46,0.7), 0 0 4px rgba(255,110,46,0.5);
+        }
+        .mobile-menu-active nav {
+            display: block;
+        }
+
+        /* Estilos do Widget de Chat VOUZTEC */
+        #vouz-chat-widget {
+            width: 360px;
+            height: 500px; /* Altura aumentada */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(255,110,46,0.3);
+            border: 1px solid #FF6E2E;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+            pointer-events: none; /* Evita interação quando escondido */
+        }
+        #vouz-chat-widget.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: auto; /* Permite interação quando visível */
+        }
+
+        #chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: #6E6E6E;
+            border-radius: 3px;
+        }
+        #chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #FF6E2E;
+        }
+        .chat-message-ia {
+            background-color: #2a2a2a; /* Um pouco mais claro que o fundo */
+            border-left: 3px solid #FF6E2E;
+        }
+        .chat-message-user {
+            background-color: #FF6E2E;
+            color: #1E1E1E; /* Texto escuro para contraste no laranja */
+        }
+        #chat-input-field::placeholder {
+            color: #6E6E6E;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <!-- Fixed Header -->
+    <header class="fixed w-full bg-black bg-opacity-90 z-50 border-b border-gray-700">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="relative w-8 h-8 mr-3">
+                    <div class="absolute w-full h-full bg-orange-500 opacity-20 rounded-full blur-md"></div>
+                    <div class="relative flex items-center justify-center w-full h-full">
+                        <div class="w-5 h-8 border-l border-r border-orange-500 relative overflow-hidden hourglass-logo">
+                            <div class="absolute top-0 left-0 w-full h-[2px] bg-orange-500 hourglass-logo-caps"></div>
+                            <div class="absolute bottom-0 left-0 w-full h-[2px] bg-orange-500 hourglass-logo-caps"></div>
+                            <div class="sand-animation absolute top-[2px] left-0 w-full h-1/2 bg-gradient-to-b from-orange-400 to-orange-600"></div>
+                        </div>
+                    </div>
+                </div>
+                <span class="text-2xl font-bold text-orange-500 neon-text">VOUZ</span>
+            </div>
+            
+            <nav id="main-nav" class="hidden md:block absolute md:relative w-full md:w-auto left-0 top-full md:top-auto bg-black bg-opacity-90 md:bg-transparent mt-0 md:mt-0 py-4 md:py-0 shadow-lg md:shadow-none">
+                <ul class="flex flex-col md:flex-row items-center md:space-x-8 space-y-4 md:space-y-0">
+                    <li><a href="#sobre" class="text-gray-300 hover:text-orange-400 transition px-6 md:px-0 py-2 md:py-0 block">Sobre</a></li>
+                    <li><a href="#solucoes" class="text-gray-300 hover:text-orange-400 transition px-6 md:px-0 py-2 md:py-0 block">Soluções</a></li>
+                    <li><a href="#portfolio" class="text-gray-300 hover:text-orange-400 transition px-6 md:px-0 py-2 md:py-0 block">Portfólio</a></li>
+                    <li><a href="#blog" class="text-gray-300 hover:text-orange-400 transition px-6 md:px-0 py-2 md:py-0 block">Blog</a></li>
+                    <li><a href="#contato" class="text-gray-300 hover:text-orange-400 transition px-6 md:px-0 py-2 md:py-0 block">Contato</a></li>
+                </ul>
+            </nav>
+            
+            <button id="mobile-menu-button" class="md:hidden text-gray-300">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section (conteúdo omitido para brevidade, mas permanece igual) -->
+    <section class="hero-bg min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
+        <div class="absolute inset-0 grid-pattern"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-70"></div>
+        <div class="container mx-auto px-6 py-20 relative z-10 text-center">
+            <div class="flex justify-center mb-10">
+                <div class="relative w-28 h-28">
+                    <div class="absolute inset-0 bg-orange-500 rounded-full opacity-20 blur-xl"></div>
+                    <div class="relative flex items-center justify-center w-full h-full">
+                        <div class="w-16 h-28 border-l-2 border-r-2 border-orange-500 relative overflow-hidden hourglass-logo">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-orange-500 hourglass-logo-caps"></div>
+                            <div class="absolute bottom-0 left-0 w-full h-1 bg-orange-500 hourglass-logo-caps"></div>
+                            <div class="sand-animation absolute top-[4px] left-0 w-full h-1/2 bg-gradient-to-b from-orange-400 to-orange-600"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 neon-text">Você é dono do seu tempo.</h1>
+            <h2 class="text-2xl md:text-4xl font-light mb-10 text-white">A tecnologia só precisa seguir você.</h2>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#solucoes" class="px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition duration-300 transform hover:scale-105">
+                    Conheça a VOUZTEC
+                </a>
+                <a href="#contato" class="px-8 py-3 border-2 border-orange-500 text-orange-400 hover:bg-gray-900 hover:bg-opacity-30 font-medium rounded-full transition duration-300 transform hover:scale-105">
+                    Fale com a IA
+                </a>
+            </div>
+        </div>
+        <div class="absolute bottom-10 left-0 right-0 flex justify-center">
+            <a href="#sobre" class="text-gray-400 hover:text-orange-400 animate-bounce">
+                <i class="fas fa-chevron-down text-2xl"></i>
+            </a>
+        </div>
+    </section>
+    <!-- Sobre Section (conteúdo omitido para brevidade, mas permanece igual) -->
+    <section id="sobre" class="py-20 bg-gradient-to-b from-black via-gray-900 to-black">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-orange-500">Sobre a VOUZTEC</h2>
+                <div class="w-20 h-1 bg-orange-500 mx-auto mb-6"></div>
+                <p class="max-w-3xl mx-auto text-lg text-gray-300">
+                    Na intersecção entre tecnologia e humanidade, criamos soluções que respeitam seu tempo e amplificam seu potencial.
+                </p>
+            </div>
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-orange-500 rounded-xl opacity-20 blur-lg"></div>
+                        <div class="relative bg-gray-800 rounded-lg p-8 border border-gray-700">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 bg-orange-500 bg-opacity-20 rounded-full flex items-center justify-center mr-4 text-orange-400">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-white">Filosofia Temporal</h3>
+                            </div>
+                            <p class="text-gray-300 mb-6">
+                                Acreditamos que cada segundo conta. Nossas soluções são projetadas para economizar seu tempo, não para consumi-lo. A tecnologia deve ser uma extensão natural do seu fluxo de trabalho, não um obstáculo.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 bg-orange-500 bg-opacity-20 rounded-full flex items-center justify-center mr-3 text-orange-400">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <h4 class="font-medium text-white">IA com Propósito</h4>
+                            </div>
+                            <p class="text-sm text-gray-400">
+                                Desenvolvemos inteligência artificial que compreende contextos humanos, adaptando-se às suas necessidades reais.
+                            </p>
+                        </div>
+                        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 bg-orange-500 bg-opacity-20 rounded-full flex items-center justify-center mr-3 text-orange-400">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <h4 class="font-medium text-white">Visão Futurista</h4>
+                            </div>
+                            <p class="text-sm text-gray-400">
+                                Inspirados pela ideia de um milionário futurista no deserto, unimos alta tecnologia with simplicidade essencial.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-orange-500 rounded-xl opacity-20 blur-lg"></div>
+                        <div class="relative bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold text-white mb-4">Nossa Jornada</h3>
+                                <p class="text-gray-300 mb-6">
+                                    Fundada por especialistas que compreendem o valor do tempo alheio, a VOUZTEC surgiu da necessidade de criar tecnologia que realmente serve, sem complicações desnecessárias.
+                                </p>
+                                <div class="space-y-4">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-orange-500 bg-opacity-20 text-orange-400">
+                                                1
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-white">Identificação</h4>
+                                            <p class="text-sm text-gray-400">Mapeamos onde seu tempo está sendo desperdiçado</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-orange-500 bg-opacity-20 text-orange-400">
+                                                2
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-white">Automação</h4>
+                                            <p class="text-sm text-gray-400">Criamos soluções que eliminam tarefas repetitivas</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-orange-500 bg-opacity-20 text-orange-400">
+                                                3
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-white">Amplificação</h4>
+                                            <p class="text-sm text-gray-400">Potencializamos sua capacidade de criação e decisão</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-900 bg-opacity-50 p-6 border-t border-gray-700">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center mr-4">
+                                        <i class="fas fa-quote-left text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="italic text-gray-300">"O tempo é o único recurso que não podemos comprar mais. Nossa missão é ajudá-lo a usá-lo da melhor forma possível."</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Soluções Section (conteúdo omitido para brevidade, mas permanece igual) -->
+        <section id="solucoes" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-orange-500">Soluções Inteligentes</h2>
+                <div class="w-20 h-1 bg-orange-500 mx-auto mb-6"></div>
+                <p class="max-w-3xl mx-auto text-lg text-gray-300">
+                    Tecnologia que trabalha nos bastidores para que você possa focar no que realmente importa.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card-hover bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-orange-500 transition-all duration-300">
+                    <div class="w-16 h-16 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-6 text-orange-400">
+                        <i class="fas fa-robot text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Atendimento Automatizado com IA</h3>
+                    <p class="text-gray-400 mb-6">
+                        Chatbots e assistentes virtuais que entendem contexto e resolvem 80% das demandas sem intervenção humana.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">24/7</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Multilíngue</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Integração</span>
+                    </div>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-orange-500 transition-all duration-300">
+                    <div class="w-16 h-16 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-6 text-orange-400">
+                        <i class="fas fa-project-diagram text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Diagnóstico de Processos com IA</h3>
+                    <p class="text-gray-400 mb-6">
+                        Identificamos gargalos e oportunidades de otimização em seus fluxos de trabalho com análise preditiva.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Análise</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Relatórios</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Sugestões</span>
+                    </div>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-orange-500 transition-all duration-300">
+                    <div class="w-16 h-16 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-6 text-orange-400">
+                        <i class="fas fa-user-cog text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Assistentes Personalizados</h3>
+                    <p class="text-gray-400 mb-6">
+                        IAs treinadas especificamente para suas necessidades, aprendendo com seus padrões e preferências.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Customização</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Aprendizado</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Privacidade</span>
+                    </div>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-orange-500 transition-all duration-300">
+                    <div class="w-16 h-16 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-6 text-orange-400">
+                        <i class="fas fa-network-wired text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Agentes GPT Corporativos</h3>
+                    <p class="text-gray-400 mb-6">
+                        Modelos de linguagem especializados em seu negócio, com conhecimento específico do seu domínio.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Conhecimento</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Treinamento</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Segurança</span>
+                    </div>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-orange-500 transition-all duration-300">
+                    <div class="w-16 h-16 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-6 text-orange-400">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Relatórios de Interação IA-Humano</h3>
+                    <p class="text-gray-400 mb-6">
+                        Métricas detalhadas sobre como sua equipe interage com as ferramentas, revelando oportunidades de melhoria.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Dashboard</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Insights</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">KPIs</span>
+                    </div>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-orange-500 transition-all duration-300">
+                    <div class="w-16 h-16 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-6 text-orange-400">
+                        <i class="fas fa-cogs text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Solução Personalizada</h3>
+                    <p class="text-gray-400 mb-6">
+                        Desenvolvemos uma solução sob medida para suas necessidades específicas, integrando todas as nossas tecnologias.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Consultoria</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Desenvolvimento</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-xs text-orange-400">Implementação</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Portfolio Section (conteúdo omitido para brevidade, mas permanece igual) -->
+        <section id="portfolio" class="py-20 bg-gradient-to-b from-black via-gray-900 to-black">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-orange-500">Casos e Resultados</h2>
+                <div class="w-20 h-1 bg-orange-500 mx-auto mb-6"></div>
+                <p class="max-w-3xl mx-auto text-lg text-gray-300">
+                    Histórias reais de como nossa tecnologia transformou a gestão do tempo e processos.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+                    <div class="h-48 bg-gradient-to-r from-orange-900 to-orange-700 flex items-center justify-center">
+                        <div class="text-center p-6">
+                            <div class="w-16 h-16 bg-orange-500 bg-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-400">
+                                <i class="fas fa-headset text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-white">Atendimento ao Cliente</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="font-medium text-white">Empresa de Telecomunicações</h4>
+                                <p class="text-sm text-gray-400">Setor: Telecom</p>
+                            </div>
+                            <div class="bg-orange-500 bg-opacity-20 text-orange-400 px-3 py-1 rounded-full text-sm">
+                                +75%
+                            </div>
+                        </div>
+                        <p class="text-gray-300 mb-4">
+                            Implementamos um sistema de atendimento automatizado que reduziu o tempo médio de espera de 15 minutos para 30 segundos, resolvendo 82% das demandas sem intervenção humana.
+                        </p>
+                        <div class="pt-4 border-t border-gray-700">
+                            <div class="flex justify-between text-sm">
+                                <div>
+                                    <span class="text-gray-400">Antes:</span>
+                                    <span class="ml-2 text-white">15 min</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-400">Depois:</span>
+                                    <span class="ml-2 text-white">30 seg</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+                    <div class="h-48 bg-gradient-to-r from-orange-900 to-orange-700 flex items-center justify-center">
+                        <div class="text-center p-6">
+                            <div class="w-16 h-16 bg-orange-500 bg-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-400">
+                                <i class="fas fa-file-invoice-dollar text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-white">Processamento de Documentos</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="font-medium text-white">Escritório de Advocacia</h4>
+                                <p class="text-sm text-gray-400">Setor: Jurídico</p>
+                            </div>
+                            <div class="bg-orange-500 bg-opacity-20 text-orange-400 px-3 py-1 rounded-full text-sm">
+                                +90%
+                            </div>
+                        </div>
+                        <p class="text-gray-300 mb-4">
+                            Automatizamos a análise e categorização de contratos, reduzindo o tempo de processamento de 8 horas para 45 minutos por documento, com precisão de 98% na identificação de cláusulas críticas.
+                        </p>
+                        <div class="pt-4 border-t border-gray-700">
+                            <div class="flex justify-between text-sm">
+                                <div>
+                                    <span class="text-gray-400">Antes:</span>
+                                    <span class="ml-2 text-white">8h/doc</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-400">Depois:</span>
+                                    <span class="ml-2 text-white">45 min/doc</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+                <div class="p-6 border-b border-gray-700">
+                    <h3 class="text-xl font-semibold text-white">Dashboard de Resultados</h3>
+                    <p class="text-gray-400">Métricas consolidadas de nossos clientes</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center mr-4 text-green-400">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-white">Tempo Economizado</h4>
+                                <p class="text-2xl font-bold text-orange-400">1.2M+ horas</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm">
+                            Tempo total economizado por nossos clientes em tarefas automatizadas
+                        </p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-orange-500 bg-opacity-20 rounded-full flex items-center justify-center mr-4 text-orange-400">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-white">Interações Automatizadas</h4>
+                                <p class="text-2xl font-bold text-orange-400">4.7M+</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm">
+                            Solicitações resolvidas sem intervenção humana
+                        </p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-purple-500 bg-opacity-20 rounded-full flex items-center justify-center mr-4 text-purple-400">
+                                <i class="fas fa-smile"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-white">Satisfação do Cliente</h4>
+                                <p class="text-2xl font-bold text-orange-400">94%</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm">
+                            Taxa média de satisfação com nossas soluções
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Blog Section (conteúdo omitido para brevidade, mas permanece igual) -->
+    <section id="blog" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-orange-500">Blog & Ideias</h2>
+                <div class="w-20 h-1 bg-orange-500 mx-auto mb-6"></div>
+                <p class="max-w-3xl mx-auto text-lg text-gray-300">
+                    Reflexões sobre o futuro do trabalho, tecnologia e a relação entre humanos e máquinas.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500 transition">
+                    <div class="h-48 bg-gradient-to-r from-orange-900 to-orange-800 flex items-center justify-center">
+                        <i class="fas fa-hourglass text-6xl text-orange-400 opacity-50"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-gray-500 mb-3">
+                            <span>15 Jun 2023</span>
+                            <span class="mx-2">•</span>
+                            <span>5 min read</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-3">A Tirania do Tempo na Era Digital</h3>
+                        <p class="text-gray-400 mb-4">
+                            Como a tecnologia, que prometia nos libertar, se tornou nossa maior distração e o que podemos fazer sobre isso.
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500 transition">
+                    <div class="h-48 bg-gradient-to-r from-orange-900 to-orange-800 flex items-center justify-center">
+                        <i class="fas fa-brain text-6xl text-orange-400 opacity-50"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-gray-500 mb-3">
+                            <span>28 Mai 2023</span>
+                            <span class="mx-2">•</span>
+                            <span>7 min read</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-3">IA como Extensão da Mente Humana</h3>
+                        <p class="text-gray-400 mb-4">
+                            Explorando o conceito de inteligência artificial como ferramenta cognitiva, não como substituto do pensamento humano.
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500 transition">
+                    <div class="h-48 bg-gradient-to-r from-orange-900 to-orange-800 flex items-center justify-center">
+                        <i class="fas fa-desktop text-6xl text-orange-400 opacity-50"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-gray-500 mb-3">
+                            <span>10 Abr 2023</span>
+                            <span class="mx-2">•</span>
+                            <span>10 min read</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-3">O Milionário Futurista no Deserto</h3>
+                        <p class="text-gray-400 mb-4">
+                            Uma parábola moderna sobre tecnologia essencial, simplicidade voluntária e a busca por significado na era digital.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Contato Section (conteúdo omitido para brevidade, mas permanece igual) -->
+    <section id="contato" class="py-20 bg-gradient-to-b from-black via-gray-900 to-black">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-orange-500">Contato</h2>
+                <div class="w-20 h-1 bg-orange-500 mx-auto mb-6"></div>
+                <p class="max-w-3xl mx-auto text-lg text-gray-300">
+                    Pronto para transformar como sua empresa lida com tempo e tecnologia?
+                </p>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-12">
+                <div class="lg:w-1/2">
+                    <div class="bg-gray-800 rounded-xl p-8 border border-gray-700">
+                        <h3 class="text-xl font-semibold text-white mb-6">Fale conosco</h3>
+                        <form>
+                            <div class="mb-6">
+                                <label for="name" class="block text-gray-400 mb-2">Nome</label>
+                                <input type="text" id="name" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Seu nome">
+                            </div>
+                            <div class="mb-6">
+                                <label for="email" class="block text-gray-400 mb-2">E-mail</label>
+                                <input type="email" id="email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="seu@email.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="subject" class="block text-gray-400 mb-2">Assunto</label>
+                                <select id="subject" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                    <option value="">Selecione um assunto</option>
+                                    <option value="sales">Consultoria de Soluções</option>
+                                    <option value="support">Suporte Técnico</option>
+                                    <option value="partnership">Parcerias</option>
+                                    <option value="other">Outro</option>
+                                </select>
+                            </div>
+                            <div class="mb-6">
+                                <label for="message" class="block text-gray-400 mb-2">Mensagem</label>
+                                <textarea id="message" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Sua mensagem..."></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-lg transition duration-300">
+                                Enviar Mensagem
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 h-full">
+                        <h3 class="text-xl font-semibold text-white mb-6">Outras formas de contato</h3>
+                        <div class="space-y-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center text-orange-400 mr-4">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-white">E-mail</h4>
+                                    <p class="text-gray-400">contato@vouztec.com</p>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center text-orange-400 mr-4">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-white">WhatsApp</h4>
+                                    <p class="text-gray-400">+55 (21) 99674-2409</p>
+                                    <a href="https://wa.me/5521996742409" target="_blank" class="text-orange-400 hover:text-orange-300 text-sm inline-flex items-center mt-1">
+                                        Iniciar conversa <i class="fas fa-external-link-alt ml-1 text-xs"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center text-orange-400 mr-4">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-white">Endereço</h4>
+                                    <p class="text-gray-400">Av. Paulista, 1000 - São Paulo, SP</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-12 pt-8 border-t border-gray-700">
+                            <h4 class="font-medium text-white mb-4">Siga a VOUZTEC</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="w-10 h-10 bg-gray-700 hover:bg-orange-500 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="https://www.instagram.com/vouztec" target="_blank" class="w-10 h-10 bg-gray-700 hover:bg-orange-500 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-gray-700 hover:bg-orange-500 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-gray-700 hover:bg-orange-500 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition">
+                                    <i class="fab fa-youtube"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Floating AI Button -->
+    <div class="ai-button">
+        <button id="ai-chat-toggle-button" class="w-16 h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center shadow-xl transition transform hover:scale-110">
+            <i class="fas fa-robot text-2xl ai-button-icon-glow"></i>
+        </button>
+    </div>
+
+    <!-- VOUZTEC Chat Widget -->
+    <div id="vouz-chat-widget" class="fixed bottom-24 right-4 md:right-8 bg-gray-900 bg-opacity-95 backdrop-blur-sm rounded-lg overflow-hidden flex flex-col z-[999]">
+        <!-- Cabeçalho do Widget -->
+        <div class="chat-header flex justify-between items-center p-3 bg-black bg-opacity-50 border-b border-gray-700">
+            <span class="text-md font-semibold text-orange-500 neon-text">VOUZTEC AI</span>
+            <button id="close-chat-widget" class="text-gray-400 hover:text-orange-400 transition-colors">
+                <i class="fas fa-times fa-lg"></i>
+            </button>
+        </div>
+
+        <!-- Área de Mensagens -->
+        <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-3">
+            <!-- Mensagem inicial da IA -->
+            <div class="flex">
+                <div class="chat-message-ia text-sm p-3 rounded-lg max-w-[85%]">
+                    Olá! Sou o assistente virtual da VOUZTEC. Como posso ajudar você a otimizar seu tempo hoje?
+                </div>
+            </div>
+            <!-- As mensagens serão adicionadas aqui pelo JavaScript -->
+        </div>
+
+        <!-- Área de Input -->
+        <div class="chat-input-area p-3 border-t border-gray-700 bg-black bg-opacity-30">
+            <form id="chat-form" class="flex items-center gap-2">
+                <input type="text" id="chat-input-field" placeholder="Digite sua mensagem..." class="flex-grow bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-shadow">
+                <button type="submit" id="send-chat-message-button" class="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors transform hover:scale-105">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Footer (conteúdo omitido para brevidade, mas permanece igual) -->
+    <footer class="bg-black py-12 border-t border-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-6 md:mb-0">
+                    <div class="relative w-8 h-8 mr-3">
+                        <div class="absolute w-full h-full bg-orange-500 opacity-20 rounded-full blur-md"></div>
+                        <div class="relative flex items-center justify-center w-full h-full">
+                             <div class="w-5 h-8 border-l border-r border-orange-500 relative overflow-hidden hourglass-logo">
+                                <div class="absolute top-0 left-0 w-full h-[2px] bg-orange-500 hourglass-logo-caps"></div>
+                                <div class="absolute bottom-0 left-0 w-full h-[2px] bg-orange-500 hourglass-logo-caps"></div>
+                                <div class="sand-animation absolute top-[2px] left-0 w-full h-1/2 bg-gradient-to-b from-orange-400 to-orange-600"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="text-xl font-bold text-orange-500 neon-text">VOUZ</span>
+                </div>
+                <div class="flex flex-wrap justify-center gap-6 mb-6 md:mb-0">
+                    <a href="#sobre" class="text-gray-400 hover:text-orange-400">Sobre</a>
+                    <a href="#solucoes" class="text-gray-400 hover:text-orange-400">Soluções</a>
+                    <a href="#portfolio" class="text-gray-400 hover:text-orange-400">Portfólio</a>
+                    <a href="#blog" class="text-gray-400 hover:text-orange-400">Blog</a>
+                    <a href="#contato" class="text-gray-400 hover:text-orange-400">Contato</a>
+                    <a href="#" class="text-gray-400 hover:text-orange-400">Termos</a>
+                    <a href="#" class="text-gray-400 hover:text-orange-400">Privacidade</a>
+                </div>
+                <div class="text-gray-500 text-sm">
+                    © 2025 VOUZTEC. Todos os direitos reservados.
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center">
+                <p class="text-gray-500 text-sm">
+                    <span class="text-orange-400">Powered by VOUZTEC AI</span> - Tecnologia que respeita seu tempo
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mainNav = document.getElementById('main-nav');
+            const navLinks = mainNav.querySelectorAll('a');
+
+            if (mobileMenuButton && mainNav) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mainNav.classList.toggle('hidden');
+                    mainNav.classList.toggle('block');
+                });
+
+                navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 768) {
+                           mainNav.classList.add('hidden');
+                           mainNav.classList.remove('block');
+                        }
+                    });
+                });
+            }
+
+            const contactForm = document.querySelector('#contato form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Formulário seria enviado aqui. Obrigado pela sua mensagem!');
+                    this.reset();
+                });
+            }
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        const headerOffset = document.querySelector('header').offsetHeight;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Lógica do Widget de Chat VOUZTEC
+            const chatToggleButton = document.getElementById('ai-chat-toggle-button');
+            const vouzChatWidget = document.getElementById('vouz-chat-widget');
+            const closeChatWidgetButton = document.getElementById('close-chat-widget');
+            const chatMessagesContainer = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInputField = document.getElementById('chat-input-field');
+            // const sendChatMessageButton = document.getElementById('send-chat-message-button'); // Já pego pelo form submit
+
+            const ASSISTANT_ID_PLACEHOLDER = "asst_DTWYMjLEiYxHDuoxhNEUpqm4"; // Substitua pelo seu Assistant ID real
+
+            function toggleChatWidget() {
+                vouzChatWidget.classList.toggle('active');
+                // Foca no campo de input quando o chat é aberto
+                if (vouzChatWidget.classList.contains('active')) {
+                    chatInputField.focus();
+                }
+            }
+
+            if (chatToggleButton && vouzChatWidget && closeChatWidgetButton) {
+                chatToggleButton.addEventListener('click', toggleChatWidget);
+                closeChatWidgetButton.addEventListener('click', toggleChatWidget);
+            }
+
+            function addMessageToChat(message, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('flex', 'max-w-full');
+                
+                const messageBubble = document.createElement('div');
+                messageBubble.classList.add('text-sm', 'p-3', 'rounded-lg', 'break-words'); // break-words para quebrar palavras longas
+                messageBubble.textContent = message;
+
+                if (sender === 'user') {
+                    messageDiv.classList.add('justify-end');
+                    messageBubble.classList.add('chat-message-user', 'ml-auto'); // ml-auto para empurrar para a direita
+                } else { // 'ia'
+                    messageBubble.classList.add('chat-message-ia', 'mr-auto'); // mr-auto para empurrar para a esquerda
+                }
+                
+                messageDiv.appendChild(messageBubble);
+                chatMessagesContainer.appendChild(messageDiv);
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; // Auto-scroll para a última mensagem
+            }
+            
+            async function handleSendMessage(userMessage) {
+                if (userMessage.trim() === '') return;
+
+                addMessageToChat(userMessage, 'user');
+                chatInputField.value = ''; // Limpa o campo
+
+                // Simula "digitando..." da IA
+                const typingIndicator = document.createElement('div');
+                typingIndicator.classList.add('flex', 'chat-message-ia-typing', 'mb-2');
+                typingIndicator.innerHTML = `<div class="text-sm p-3 rounded-lg chat-message-ia mr-auto"><i>Digitando...</i></div>`;
+                chatMessagesContainer.appendChild(typingIndicator);
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+
+
+                // --- PONTO DE INTEGRAÇÃO COM A API OPENAI ASSISTANTS ---
+                // Aqui você faria a chamada para a API da OpenAI usando o ASSISTANT_ID_PLACEHOLDER
+                // e a mensagem do usuário (userMessage).
+                // Por exemplo:
+                // try {
+                //     const response = await fetch('/api/chat-with-assistant', { // Uma rota no seu backend
+                //         method: 'POST',
+                //         headers: { 'Content-Type': 'application/json' },
+                //         body: JSON.stringify({ 
+                //             assistantId: ASSISTANT_ID_PLACEHOLDER, 
+                //             message: userMessage 
+                //         })
+                //     });
+                //     if (!response.ok) throw new Error('Network response was not ok.');
+                //     const data = await response.json();
+                //     const aiResponse = data.reply; // Supondo que sua API retorne a resposta da IA aqui
+                //     
+                //     // Remove o "digitando..."
+                //     typingIndicator.remove(); 
+                //     addMessageToChat(aiResponse, 'ia');
+                //
+                // } catch (error) {
+                //     console.error("Erro ao enviar mensagem para o assistente:", error);
+                //     typingIndicator.remove(); 
+                //     addMessageToChat("Desculpe, não consegui processar sua solicitação no momento. Tente novamente mais tarde.", 'ia');
+                // }
+                // --- FIM DO PONTO DE INTEGRAÇÃO ---
+
+                // Simulação de resposta da IA após um tempo (REMOVA ISSO APÓS INTEGRAR COM A API REAL)
+                setTimeout(() => {
+                    typingIndicator.remove(); // Remove o "digitando..."
+                    let aiResponse = "Esta é uma resposta simulada. Para uma conversa real, o desenvolvedor precisa integrar o Assistant ID: " + ASSISTANT_ID_PLACEHOLDER + ". Você disse: '" + userMessage + "'";
+                    if (userMessage.toLowerCase().includes("soluções")) {
+                        aiResponse = "Claro! Nossas soluções incluem Agentes GPT personalizados, Atendimento ao cliente com IA, Automatização de processos e Diagnóstico com relatórios. Qual delas te interessa mais?";
+                    } else if (userMessage.toLowerCase().includes("tempo")) {
+                        aiResponse = "Entendo sua preocupação com o tempo! Na VOUZTEC, nossa filosofia é que 'Você é dono do seu tempo. A tecnologia só precisa seguir você.' Como posso ajudar a otimizar o seu?";
+                    }
+                    addMessageToChat(aiResponse, 'ia');
+                }, 2000 + Math.random() * 1500); // Tempo de resposta variado
+            }
+
+
+            if (chatForm && chatInputField) {
+                chatForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const userMessage = chatInputField.value;
+                    handleSendMessage(userMessage);
+                });
+            }
+
+        });
+    </script>
+</body>
+</html>
